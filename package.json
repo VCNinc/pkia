@@ -19,6 +19,6 @@
   "dependencies": {
     "express": "^4.17.1",
     "openpgp": "^5.0.0-1",
-    "trs-js": "^0.1.0"
+    "trs-js": "^0.2.0"
   }
 }
