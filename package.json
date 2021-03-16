@@ -2,7 +2,7 @@
   "name": "pkia",
   "version": "1.0.0",
   "description": " Efficient Public Key Infrastructure Anonymization (PKIA) Construction",
-  "main": "index.js",
+  "main": "node.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
