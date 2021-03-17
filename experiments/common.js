@@ -1,18 +1,34 @@
-const trs = require('trs-js')
-const node = require('../node.js')
+const trs = require('trs-js');
+const node = require('../node.js');
+const channel = require('../channel.js');
 
-module.exports.run = (configs) => {
-  var promises = [];
+module.exports.run = async (configs) => {
+  var stopChannel = await channel(configs[0].peers, configs[0].broadcast);
+
+  var startPromises = [];
 
   configs.forEach((config) => {
-    promises.push(node(config));
+    startPromises.push(node(config));
   });
 
-  return Promise.all(promises);
+  var nodes = await Promise.all(startPromises);
+
+  var runPromises = [];
+
+  nodes.forEach((node) => {
+    runPromises.push(node.run());
+  });
+
+  var results = await Promise.all(runPromises);
+
+  stopChannel();
+
+  return results;
 }
 
-module.exports.init = (N) => {
+module.exports.init = (N, issue) => {
   var configs = [];
+  var peers = [];
   var pki = [];
 
   for (let i = 0; i < N; i++) {
@@ -27,15 +43,21 @@ module.exports.init = (N) => {
       key: {
         public: pk,
         private: sk
-      }
+      },
+      issue: issue,
+      broadcast: 19999,
+      timeBound: 1000
     });
-    pki.push({
+    peers.push({
+      id: 'NODE' + i,
       endpoint: 'http://localhost:' + port,
       key: pk
     });
+    pki.push(pk);
   }
 
   for (let i = 0; i < N; i++) {
+    configs[i].peers = peers;
     configs[i].pki = pki;
   }
 
