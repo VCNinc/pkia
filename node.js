@@ -74,7 +74,8 @@ module.exports = (config) => {
         console.debug(`${config.id} execution terminated successfully`);
         resolve({
           id: config.id,
-          result: pki
+          result: pki,
+          represented: pki.has(publicKeyArmored)
         });
       });
     }
