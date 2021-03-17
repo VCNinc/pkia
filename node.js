@@ -6,6 +6,8 @@ const trs = require('trs-js');
 openpgp.config.show_version = false;
 openpgp.config.show_comment = false;
 
+console.debug = () => {}
+
 module.exports = (config) => {
   return new Promise((resolve, reject) => {
     const app = express();
@@ -78,19 +80,19 @@ module.exports = (config) => {
     }
 
     app.post('/sspk', (req, res) => {
-      console.log(`${config.id} - got sspk`);
+      console.debug(`${config.id} - got sspk`);
       res.sendStatus(200);
       sspks.push(req.body);
     });
 
     app.post('/sspks', (req, res) => {
-      console.log(`${config.id} - got sspks`);
+      console.debug(`${config.id} - got sspks`);
       res.sendStatus(200);
       sspkss.push(req.body);
     });
 
     var server = app.listen(config.port, () => {
-      console.log(`${config.id} - listening at http://localhost:${config.port}`);
+      console.debug(`${config.id} - listening at http://localhost:${config.port}`);
       resolve({
         id: config.id,
         app: app,
