@@ -3,8 +3,9 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 const openpgp = require('openpgp');
 const trs = require('trs-js');
-const AWS = require('aws-sdk');
 const exec = require('child_process').exec;
+const AWS = require('aws-sdk');
+AWS.config.update({region:'us-east-2'});
 
 openpgp.config.show_version = false;
 openpgp.config.show_comment = false;
