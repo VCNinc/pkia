@@ -14,6 +14,13 @@ var instance_id = -1;
 const app = express();
 app.use(bodyParser.json());
 
+app.post('/sns', (req, res) => {
+  res.sendStatus(200);
+  if(req.body.type === "SubscriptionConfirmation") {
+    axios.get(req.body.SubscribeURL);
+  }
+});
+
 app.get('/hello', (req, res) => {
   res.send("instance id: " + instance_id);
 });
