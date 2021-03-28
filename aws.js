@@ -13,7 +13,7 @@ var instance_id = -1;
 
 const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
+app.use(bodyParser.json({type: '*'}));
 
 app.post('/sns', (req, res) => {
   res.sendStatus(200);
