@@ -29,7 +29,7 @@ app.post('/sns', (req, res) => {
     if (message === "stage1") {
       broadcast('hello from instance ' + instance_id);
     } else if (message === "stage2") {
-      writeToS3(received);
+      writeToS3(experiment_id + '/out/' + instance_id + '.txt', received);
     } else {
       received += message + "\n";
     }
@@ -44,11 +44,11 @@ var server = app.listen(80, async () => {
   instance_id = (await axios.get('http://169.254.169.254/latest/meta-data/ami-launch-index')).data;
 });
 
-async function writeToS3(data) {
+async function writeToS3(name, data) {
   return await new AWS.S3({apiVersion: '2006-03-01'}).putObject({
     Body: data,
     Bucket: "pkia-results",
-    Key: experiment_id + '/' + instance_id
+    Key: name
   }).promise();
 }
 
