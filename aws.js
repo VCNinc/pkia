@@ -19,5 +19,5 @@ app.get('/hello', (req, res) => {
 });
 
 var server = app.listen(80, async () => {
-  instance_id = await axios.get('http://169.254.169.254/latest/meta-data/ami-launch-index');
+  instance_id = (await axios.get('http://169.254.169.254/latest/meta-data/ami-launch-index')).data;
 });
