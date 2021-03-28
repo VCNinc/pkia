@@ -22,11 +22,11 @@ app.get('/hello', (req, res) => {
 
 app.post('/shutdown', (req, res) => {
   res.sendStatus(200);
-  shutdown(function(output){
+  shutdown((output) => {
       console.log(output);
   });
 });
 
-var server = app.listen(config.port, () => {
+var server = app.listen(80, () => {
   console.log('listening!');
 });
