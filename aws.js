@@ -17,7 +17,7 @@ app.use(bodyParser.json({type: '*/*'}));
 
 app.post('/sns', (req, res) => {
   res.sendStatus(200);
-  if(req.body.type === "SubscriptionConfirmation") {
+  if(req.body.Type === "SubscriptionConfirmation") {
     axios.get(req.body.SubscribeURL);
   }
 });
