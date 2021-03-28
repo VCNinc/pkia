@@ -30,7 +30,7 @@ app.post('/sns', (req, res) => {
     } else if (message === "stage2") {
       writeToS3(received);
     } else {
-      received.push(message + "\n");
+      received += message + "\n";
     }
   }
 });
