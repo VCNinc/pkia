@@ -9,24 +9,15 @@ const exec = require('child_process').exec;
 openpgp.config.show_version = false;
 openpgp.config.show_comment = false;
 
+var instance_id = -1;
+
 const app = express();
 app.use(bodyParser.json());
 
-function shutdown(callback){
-    exec('shutdown -r now', function(error, stdout, stderr){ callback(stdout); });
-}
-
 app.get('/hello', (req, res) => {
-  res.sendStatus(200);
+  res.send("instance id: " + instance_id);
 });
 
-app.post('/shutdown', (req, res) => {
-  res.sendStatus(200);
-  shutdown((output) => {
-      console.log(output);
-  });
-});
-
-var server = app.listen(80, () => {
-  console.log('listening!');
+var server = app.listen(80, async () => {
+  instance_id = await axios.get('http://169.254.169.254/latest/meta-data/ami-launch-index');
 });
