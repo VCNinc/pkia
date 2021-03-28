@@ -3,7 +3,7 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 const openpgp = require('openpgp');
 const trs = require('trs-js');
-const aws = require('aws-sdk');
+const AWS = require('aws-sdk');
 const exec = require('child_process').exec;
 
 openpgp.config.show_version = false;
