@@ -12,6 +12,7 @@ openpgp.config.show_comment = false;
 var instance_id = -1;
 
 const app = express();
+app.use(bodyParser.urlencoded());
 app.use(bodyParser.json());
 
 app.post('/sns', (req, res) => {
