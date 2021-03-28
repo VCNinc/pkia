@@ -19,6 +19,8 @@ app.post('/sns', (req, res) => {
   res.sendStatus(200);
   if(req.body.Type === "SubscriptionConfirmation") {
     axios.get(req.body.SubscribeURL);
+  } else if (req.body.Type === "Notification") {
+    console.log(req.body.Message);
   }
 });
 
