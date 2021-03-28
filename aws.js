@@ -24,6 +24,7 @@ app.post('/sns', (req, res) => {
     axios.get(req.body.SubscribeURL);
   } else if (req.body.Type === "Notification") {
     // const message = JSON.parse(req.body.Message);
+    const message = req.body.Message;
     if (message === "stage1") {
       broadcast('hello from instance ' + instance_id);
     } else if (message === "stage2") {
