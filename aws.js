@@ -16,13 +16,21 @@ const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json({type: '*/*'}));
 
+var received = '';
+
 app.post('/sns', (req, res) => {
   res.sendStatus(200);
   if(req.body.Type === "SubscriptionConfirmation") {
     axios.get(req.body.SubscribeURL);
   } else if (req.body.Type === "Notification") {
     // const message = JSON.parse(req.body.Message);
-    writeToS3('hello from instance ' + instance_id);
+    if (message === "stage1") {
+      broadcast('hello from instance ' + instance_id);
+    } else if (message === "stage2") {
+      writeToS3(received);
+    } else {
+      received.push(message + "\n");
+    }
   }
 });
 
@@ -39,5 +47,12 @@ async function writeToS3(data) {
     Body: data,
     Bucket: "pkia-results",
     Key: experiment_id + '/' + instance_id
+  }).promise();
+}
+
+async function broadcast(data) {
+  return await new AWS.SNS({apiVersion: '2010-03-31'}).publish({
+    Message: data,
+    TopicArn: 'arn:aws:sns:us-east-2:295064964666:covert-channel'
   }).promise();
 }
