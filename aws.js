@@ -54,7 +54,7 @@ async function writeToS3(name, data) {
 
 async function broadcast(data) {
   return await new AWS.Firehose({apiVersion: '2015-08-04'}).putRecord({
-    Record: data,
+    Record: {Data: data},
     DeliveryStreamName: 'covert-channel'
   }).promise();
 }
