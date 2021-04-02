@@ -53,8 +53,8 @@ async function writeToS3(name, data) {
 }
 
 async function broadcast(data) {
-  return await new AWS.SNS({apiVersion: '2010-03-31'}).publish({
-    Message: data,
-    TopicArn: 'arn:aws:sns:us-east-2:295064964666:covert-channel'
+  return await new AWS.Firehose({apiVersion: '2015-08-04'}).putRecord({
+    Record: data,
+    DeliveryStreamName: 'covert-channel'
   }).promise();
 }
