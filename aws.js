@@ -24,7 +24,7 @@ app.post('/sns', (req, res) => {
   if(req.body.Type === "SubscriptionConfirmation") {
     axios.get(req.body.SubscribeURL);
   } else if (req.body.Type === "Notification") {
-    const message = req.body.Message;
+    var message = req.body.Message;
     if (message === "stage1") {
       broadcast({
         message: 'hello from instance ' + instance_id,
@@ -33,7 +33,7 @@ app.post('/sns', (req, res) => {
     } else if (message === "stage2") {
       writeToS3(experiment_id + '/out/' + instance_id + '.txt', received);
     } else {
-      const message = JSON.parse(req.body.Message);
+      message = JSON.parse(message);
       message.Records.forEach((record) => {
         handleS3Record(record);
       });
@@ -70,8 +70,8 @@ async function handleCommand(command) {
 
 async function handleS3Record(record) {
   if (record.s3.bucket.name === "pkia-covert-channel" && record.eventName === "ObjectCreated:Put") {
-    let record = await fetchS3Record(record.s3.object.key);
-    handleCommand(record);
+    let data = await fetchS3Record(record.s3.object.key);
+    handleCommand(data);
   }
 }
 
