@@ -65,14 +65,14 @@ async function broadcast(data) {
 }
 
 async function handleCommand(command) {
-  received.push(command);
+  received.push(command.message);
 }
 
 async function handleS3Record(record) {
   if (record.s3.bucket.name === "pkia-covert-channel" && record.eventName === "ObjectCreated:Put") {
     let data = await fetchS3Record(record.s3.object.key);
-    let commands = data.split("\n");
-    commands.forEach(c => handleCommand(JSON.parse(command)));
+    let commands = data.split(/\r?\n/);
+    commands.forEach(c => handleCommand(JSON.parse(c)));
   }
 }
 
