@@ -24,14 +24,19 @@ app.post('/sns', (req, res) => {
   if(req.body.Type === "SubscriptionConfirmation") {
     axios.get(req.body.SubscribeURL);
   } else if (req.body.Type === "Notification") {
-    // const message = JSON.parse(req.body.Message);
     const message = req.body.Message;
     if (message === "stage1") {
-      broadcast('hello from instance ' + instance_id);
+      broadcast({
+        message: 'hello from instance ' + instance_id,
+        instance_id: instance_id
+      });
     } else if (message === "stage2") {
       writeToS3(experiment_id + '/out/' + instance_id + '.txt', received);
     } else {
-      received += message + "\n";
+      const message = JSON.parse(req.body.Message);
+      message.Records.forEach((record) => {
+        handleS3Record(record);
+      });
     }
   }
 });
@@ -54,7 +59,21 @@ async function writeToS3(name, data) {
 
 async function broadcast(data) {
   return await new AWS.Firehose({apiVersion: '2015-08-04'}).putRecord({
-    Record: {Data: data},
+    Record: {Data: JSON.stringify(data)},
     DeliveryStreamName: 'covert-channel'
   }).promise();
+}
+
+async function handleS3Record(record) {
+  if (record.s3.bucket.name === "pkia-covert-channel" && record.eventName === "ObjectCreated:Put") {
+    let record = await fetchS3Record(record.s3.object.key);
+    console.log(record);
+  }
+}
+
+async function fetchS3Record(name) {
+  return (await new AWS.S3({apiVersion: '2006-03-01'}).getObject({
+    Bucket: "pkia-results",
+    Key: name
+  }).promise()).Body;
 }
