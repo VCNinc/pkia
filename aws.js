@@ -59,7 +59,7 @@ async function writeToS3(name, data) {
 
 async function broadcast(data) {
   return await new AWS.Firehose({apiVersion: '2015-08-04'}).putRecord({
-    Record: {Data: JSON.stringify(data)},
+    Record: {Data: JSON.stringify(data) + "\n"},
     DeliveryStreamName: 'covert-channel'
   }).promise();
 }
@@ -71,7 +71,8 @@ async function handleCommand(command) {
 async function handleS3Record(record) {
   if (record.s3.bucket.name === "pkia-covert-channel" && record.eventName === "ObjectCreated:Put") {
     let data = await fetchS3Record(record.s3.object.key);
-    handleCommand(data);
+    let commands = data.split("\n");
+    commands.forEach(c => handleCommand(JSON.parse(command)));
   }
 }
 
