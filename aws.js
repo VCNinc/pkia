@@ -17,7 +17,7 @@ const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json({type: '*/*'}));
 
-var received = '';
+var received = [];
 
 app.post('/sns', (req, res) => {
   res.sendStatus(200);
@@ -51,7 +51,7 @@ var server = app.listen(80, async () => {
 
 async function writeToS3(name, data) {
   return await new AWS.S3({apiVersion: '2006-03-01'}).putObject({
-    Body: data,
+    Body: JSON.stringify(data),
     Bucket: "pkia-results",
     Key: name
   }).promise();
@@ -64,10 +64,14 @@ async function broadcast(data) {
   }).promise();
 }
 
+async function handleCommand(command) {
+  received.push(command);
+}
+
 async function handleS3Record(record) {
   if (record.s3.bucket.name === "pkia-covert-channel" && record.eventName === "ObjectCreated:Put") {
     let record = await fetchS3Record(record.s3.object.key);
-    console.log(record);
+    handleCommand(record);
   }
 }
 
