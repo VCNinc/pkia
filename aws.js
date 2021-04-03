@@ -76,8 +76,8 @@ async function handleS3Record(record) {
 }
 
 async function fetchS3Record(name) {
-  return (await new AWS.S3({apiVersion: '2006-03-01'}).getObject({
+  return JSON.parse((await new AWS.S3({apiVersion: '2006-03-01'}).getObject({
     Bucket: "pkia-covert-channel",
     Key: name
-  }).promise()).Body;
+  }).promise()).Body.toString());
 }
