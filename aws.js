@@ -64,8 +64,8 @@ async function broadcast(data) {
   }).promise();
 }
 
-async function handleCommand(command) {
-  let command = JSON.parse(command);
+async function handleCommand(request) {
+  let command = JSON.parse(request);
   received.push(command.message);
 }
 
