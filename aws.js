@@ -65,8 +65,10 @@ async function broadcast(data) {
 }
 
 async function handleCommand(request) {
-  let cmd = JSON.parse(request);
-  received.push(cmd.message);
+  try {
+    let cmd = JSON.parse(request);
+    received.push(cmd.message);
+  } catch (error) {}
 }
 
 async function handleS3Record(record) {
