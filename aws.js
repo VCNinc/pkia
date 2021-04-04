@@ -68,7 +68,7 @@ var server = app.listen(80, async () => {
   let PKI_O_IN = JSON.parse(pki_file);
   let key_file = fs.readFileSync('./PPKI(O)/' + INSTANCE_ID + '.key');
   let PKI_O_IN_KEY = await openpgp.readKey({ armoredKey: key_file });
-  PKI_O_IN_PUB = PKI_O_IN_KEY.toPublic.armor();
+  PKI_O_IN_PUB = PKI_O_IN_KEY.toPublic().armor();
   let N = PKI_O_IN.length;
   PKI_O_IN.forEach((partition) => {
     PKS[partition.pks[0]] = partition.ids[0];
