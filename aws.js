@@ -89,7 +89,7 @@ async function PKIReconstitution() {
   log("step1");
 
   // 2. Each process generates a signature
-  const cleartextMessage = await openpgp.createCleartextMessage({ text: publicKeyArmored });
+  const cleartextMessage = await openpgp.CleartextMessage.fromText(publicKeyArmored);
   const detachedSignature = await openpgp.sign({
       message: cleartextMessage,
       privateKeys: privateKey,
