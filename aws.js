@@ -3,15 +3,13 @@ const axios = require('axios');
 const bodyParser = require('body-parser');
 const openpgp = require('openpgp');
 const trs = require('trs-js');
+const fs = require('fs');
 const exec = require('child_process').exec;
 const AWS = require('aws-sdk');
 AWS.config.update({region:'us-east-2'});
 
 openpgp.config.show_version = false;
 openpgp.config.show_comment = false;
-
-var instance_id = -1;
-var experiment_id = "test";
 
 const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
@@ -25,19 +23,21 @@ app.post('/sns', (req, res) => {
     axios.get(req.body.SubscribeURL);
   } else if (req.body.Type === "Notification") {
     var message = req.body.Message;
-    if (message === "stage1") {
-      broadcast({
-        message: 'hello from instance ' + instance_id,
-        instance_id: instance_id
-      });
-    } else if (message === "stage2") {
-      writeToS3(experiment_id + '/out/' + instance_id + '.txt', received);
+    if (message === "start") {
+      PKIReconstitution();
     } else {
       message = JSON.parse(message);
       message.Records.forEach((record) => {
         handleS3Record(record);
       });
     }
+    //   broadcast({
+    //     message: 'hello from instance ' + instance_id,
+    //     instance_id: instance_id
+    //   });
+    // } else if (message === "stage2") {
+    //   writeToS3(instance_id + '.txt', received);
+    // }
   }
 });
 
@@ -45,9 +45,66 @@ app.get('/hello', (req, res) => {
   res.send("instance id: " + instance_id);
 });
 
+var PKI_O_IN = [];
+var PKI_O_IN_KEY;
+var PKI_O_IN_PUB;
+var LOGS = [];
+var INSTANCE_ID;
+var PUBLIC_IPV4;
+var N;
+var PKS = [];
+
+function log(event) {
+  LOGS.push({
+    time: Date.now(),
+    event: event
+  })
+}
+
 var server = app.listen(80, async () => {
-  instance_id = (await axios.get('http://169.254.169.254/latest/meta-data/ami-launch-index')).data;
+  INSTANCE_ID = (await axios.get('http://169.254.169.254/latest/meta-data/ami-launch-index')).data;
+  PUBLIC_IPV4 = (await axios.get('http://169.254.169.254/latest/meta-data/public-ipv4')).data;
+  let pki_file = fs.readFileSync('./PPKI(O)/pki.json');
+  let PKI_O_IN = JSON.parse(pki_file);
+  let key_file = fs.readFileSync('./PPKI(O)/' + INSTANCE_ID + '.key');
+  let PKI_O_IN_KEY = await openpgp.readKey({ armoredKey: key_file });
+  PKI_O_IN_PUB = PKI_O_IN_KEY.toPublic.armor();
+  let N = PKI_O_IN.length;
+  PKI_O_IN.forEach((partition) => {
+    PKS[partition.pks[0]] = partition.ids[0];
+  });
+  await new AWS.SNS({apiVersion: '2010-03-31'}).subscribe({
+      Protocol: 'http',
+      TopicArn: 'arn:aws:sns:us-east-2:295064964666:covert-channel',
+      Endpoint: 'http://' + PUBLIC_IPV4 + '/sns'
+  }).promise();
 });
+
+async function PKIReconstitution() {
+  log("start");
+
+  // 1. Each process generates a key pair
+  const { privateKeyArmored, publicKeyArmored } = await openpgp.generateKey({});
+  const privateKey = await openpgp.readKey({ armoredKey: privateKeyArmored });
+  log("step1");
+
+  // 2. Each process generates a signature
+  const cleartextMessage = await openpgp.createCleartextMessage({ text: publicKeyArmored });
+  const detachedSignature = await openpgp.sign({
+      message: cleartextMessage,
+      privateKeys: privateKey,
+      detached: true
+  });
+  log("step2");
+
+  // 3. Each process invokes the reliable broadcast protocol on message
+  await broadcast({
+    pkin: PKI_O_IN_PUB,
+    pkout: publicKeyArmored,
+    sig: detachedSignature
+  });
+  log("step3");
+}
 
 async function writeToS3(name, data) {
   return await new AWS.S3({apiVersion: '2006-03-01'}).putObject({

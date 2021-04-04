@@ -6,8 +6,8 @@ const { v4: uuidv4 } = require('uuid');
 openpgp.config.show_version = false;
 openpgp.config.show_comment = false;
 
-const out = 'PPKI(O)/25/';
-const N = 25;
+const out = 'PPKI(O)/';
+const N = 3;
 
 let PKI = [];
 
